@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fab_container"
+    android:layout_width="72dp"
+    android:layout_height="72dp">
+
+    <!-- Pulse ring -->
+    <View
+        android:id="@+id/pulse_ring"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_pulse_ring"
+        android:alpha="0" />
+
+    <!-- Circular button -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/fab_main"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="center"
+        android:text="🤖"
+        android:textSize="24sp"
+        android:background="@drawable/bg_fab_circle"
+        android:textColor="#FFFFFF"
+        android:padding="0dp"
+        android:elevation="8dp"
+        android:stateListAnimator="@null" />
+
+</FrameLayout>

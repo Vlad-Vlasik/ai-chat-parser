@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AI Chat Parser</string>
+    <string name="accessibility_service_label">AI Chat Parser</string>
+    <string name="accessibility_service_description">
+        Reads AI chat messages (ChatGPT, Claude, Gemini, etc.) to export them as JSON and Markdown files.
+        No data is sent anywhere — everything is saved locally on your device.
+    </string>
+</resources>
