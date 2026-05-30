@@ -29,6 +29,40 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Verify gradle wrapper
+        run: |
+          ls -lh gradle/wrapper/
+          java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain --version || true
+
+      - name: Create gradle.properties
+        run: |
+          echo "android.useAndroidX=true" > gradle.properties
+          echo "android.enableJetifier=true" >> gradle.properties
+          echo "org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8" >> gradle.properties
+          echo "org.gradle.parallel=true" >> gradle.properties
+
+      - name: Generate launcher icons
+        run: |
+          python3 -c "
+          import os, struct, zlib
+          def make_png(size):
+              def chunk(name, data):
+                  c = zlib.crc32(name + data) & 0xffffffff
+                  return struct.pack('>I', len(data)) + name + data + struct.pack('>I', c)
+              raw = b''.join(b'\x00' + b''.join(bytes([25,118,210])+b'\xff' if (x-size//2)**2+(y-size//2)**2<=(size//2-2)**2 else b'\x00\x00\x00\x00' for x in range(size)) for y in range(size))
+              png = b'\x89PNG\r\n\x1a\n'
+              png += chunk(b'IHDR', struct.pack('>IIBBBBB', size, size, 8, 6, 0, 0, 0))
+              png += chunk(b'IDAT', zlib.compress(raw))
+              png += chunk(b'IEND', b'')
+              return png
+          for f,s in {'mipmap-mdpi':48,'mipmap-hdpi':72,'mipmap-xhdpi':96,'mipmap-xxhdpi':144,'mipmap-xxxhdpi':192}.items():
+              os.makedirs(f'app/src/main/res/{f}', exist_ok=True)
+              p = make_png(s)
+              open(f'app/src/main/res/{f}/ic_launcher.png','wb').write(p)
+              open(f'app/src/main/res/{f}/ic_launcher_round.png','wb').write(p)
+          print('Icons OK')
+          "
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
@@ -65,37 +99,3 @@ jobs:
           name: ai-chat-parser-release-${{ github.run_number }}
           path: app/build/outputs/apk/release/*.apk
           retention-days: 30
-
-  release:
-    name: GitHub Release
-    needs: build
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-    permissions:
-      contents: write
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: gradle
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Grant gradlew permission
-        run: chmod +x gradlew
-
-      - name: Build Release APK
-        run: ./gradlew assembleRelease --stacktrace
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: "AI Chat Parser ${{ github.ref_name }}"
-          generate_release_notes: true
-          files: app/build/outputs/apk/release/*.apk
