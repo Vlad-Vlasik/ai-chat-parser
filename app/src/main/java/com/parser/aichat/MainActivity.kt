@@ -116,7 +116,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadHistory() {
         historyContainer.removeAllViews()
-        val files = FileManager.listExports(this)
+        val files = FileManager.listExports()
 
         if (files.isEmpty()) {
             tvNoFiles.visibility = View.VISIBLE
@@ -182,7 +182,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openExportFolder() {
-        val dir = FileManager.getExportDirectory(this)
+        val dir = FileManager.getExportDirectory()
         try {
             val uri = Uri.parse(dir.absolutePath)
             val intent = Intent(Intent.ACTION_VIEW).apply {
